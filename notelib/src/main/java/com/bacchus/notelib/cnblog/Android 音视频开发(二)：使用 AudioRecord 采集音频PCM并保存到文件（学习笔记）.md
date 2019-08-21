@@ -156,9 +156,13 @@ Android SDK 提供了两套音频采集的API，分别是：MediaRecorder 和 Au
 	```
 #### 流程走向
 - buffer 从 AudioRecord 中拉取声音数据
+
 ![拉取数据](https://github.com/Bacchuc/AudioVideo/blob/master/notelib/src/main/java/com/bacchus/notelib/image/cnblog_pull.png)
+
 - 创建一个数据流，开启一个线程，一边从 AudioRecord 中读取数据，一边将数据导入到数据流中
+
 ![导出数据](https://github.com/Bacchuc/AudioVideo/blob/master/notelib/src/main/java/com/bacchus/notelib/image/cnblog_push.png)
+
 #### 参考文献
 - [Android音频开发（2）：如何采集一帧音频](https://blog.51cto.com/ticktick/1749719)
 - [Android 音视频开发(二)：使用 AudioRecord 采集音频PCM并保存到文件](https://www.cnblogs.com/renhui/p/7457321.html)
