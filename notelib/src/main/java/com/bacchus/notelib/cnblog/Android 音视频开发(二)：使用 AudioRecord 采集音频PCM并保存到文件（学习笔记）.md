@@ -49,41 +49,41 @@ Android SDK 提供了两套音频采集的API，分别是：MediaRecorder 和 Au
 - **设置所有 AudioRecord 参数**
 
 	```
-	    // 音频输入-麦克风
-	    private final static int AUDIO_INPUT = MediaRecorder.AudioSource.MIC;
-	    // 采样频率 一般共分为 22.05KHz、44.1KHz、48KHz 三个等级
-	    // 44100 是目前的标准，但是某些设备仍然支持 22050，16000，11025
-	    private final static int AUDIO_SAMPLE_RATE = 44100;
-	    // 声道 单声道
-	    private final static int AUDIO_CHANNEL = AudioFormat.CHANNEL_IN_MONO;
-	    // 编码
-	    private final static int AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
-	    // 缓冲区字节大小
-	    private int bufferSizeInBytes = 0;
-	    // 录音对象
-	    private AudioRecord audioRecord;
+    	// 音频输入-麦克风
+    	private final static int AUDIO_INPUT = MediaRecorder.AudioSource.MIC;
+    	// 采样频率 一般共分为 22.05KHz、44.1KHz、48KHz 三个等级
+    	// 44100 是目前的标准，但是某些设备仍然支持 22050，16000，11025
+    	private final static int AUDIO_SAMPLE_RATE = 44100;
+    	// 声道 单声道
+    	private final static int AUDIO_CHANNEL = AudioFormat.CHANNEL_IN_MONO;
+    	// 编码
+    	private final static int AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
+    	// 缓冲区字节大小
+    	private int bufferSizeInBytes = 0;
+    	// 录音对象
+    	private AudioRecord audioRecord;
 	```
 - **创建 AudioRecord 并且获取缓冲区字节大小**
 
 	```
-	    /**
-	     * 创建默认的录音对象
-	     *
-	     * @param fileName 文件名
-	     */
-	    public void createDefaultAudio(String fileName) {
-	        // 获得缓冲区字节大小，AudioRecord 能接受的最小的 buffer 大小
-	        bufferSizeInBytes = AudioRecord.getMinBufferSize(AUDIO_SAMPLE_RATE, AUDIO_CHANNEL, AUDIO_ENCODING);
-	        // 创建默认的录音对象并且设置一系列配置
-	        audioRecord = new AudioRecord(AUDIO_INPUT, AUDIO_SAMPLE_RATE, AUDIO_CHANNEL, AUDIO_ENCODING, bufferSizeInBytes);
-	        this.fileName = fileName;
-	    }
+    	/**
+     	* 创建默认的录音对象
+     	*
+     	* @param fileName 文件名
+     	*/
+    	public void createDefaultAudio(String fileName) {
+	    // 获得缓冲区字节大小，AudioRecord 能接受的最小的 buffer 大小
+	    bufferSizeInBytes = AudioRecord.getMinBufferSize(AUDIO_SAMPLE_RATE, AUDIO_CHANNEL, AUDIO_ENCODING);
+	    // 创建默认的录音对象并且设置一系列配置
+	    audioRecord = new AudioRecord(AUDIO_INPUT, AUDIO_SAMPLE_RATE, AUDIO_CHANNEL, AUDIO_ENCODING, bufferSizeInBytes);
+	    this.fileName = fileName;
+    	}
 	```
 - **创建 buffer (用于保存新的声音数据)，设置 buffer 大小(录制声音数据容量大小)**
 
 	```
-	    // new 一个 byte 数组用来存一些字节数据，大小为缓冲区大小
-	    byte[] audiodata = new byte[bufferSizeInBytes];
+	// new 一个 byte 数组用来存一些字节数据，大小为缓冲区大小
+	byte[] audiodata = new byte[bufferSizeInBytes];
 	```
 
 - **开始录音**
@@ -96,43 +96,42 @@ Android SDK 提供了两套音频采集的API，分别是：MediaRecorder 和 Au
 - **开始采集，一边从AudioRecord中读取声音数据到初始化的buffer，一边将buffer中数据导入数据流**
 
 	```
-	    // 开个子线程将录音的数据放入pcm文件
-	    new Thread(new Runnable() {
-	        @Override
-	        public void run() {
-	            writeDataTOFile(listener);
-	        }
-	    }).start();
-
-	    // 如何将音频写入文件是重点，我写个伪代码，说明这个代码运行顺序
-	    // 首先创建 pcm 文件，得到他的 FileOutputStream，然后不断循环 AudioRecord 通过 read 将录音的数据放入字节数组里，
-	    // 当录音结束的时候要记得停止这个循环
-	    FileOutputStream fos = null;
-	    int readsize = 0;
-	    try {
-	        File file = new File(currentFileName);
-	        if (file.exists()) {
-	            file.delete();
-	        }
-	        // 建立一个可存取字节的文件
-	        fos = new FileOutputStream(file);
-	    } catch (IllegalStateException e) {
-	        Log.e("AudioRecorder", e.getMessage());
-	        throw new IllegalStateException(e.getMessage());
-	    } catch (FileNotFoundException e) {
-	        Log.e("AudioRecorder", e.getMessage());
-
+    	// 开个子线程将录音的数据放入pcm文件
+    	new Thread(new Runnable() {
+	    @Override
+	    public void run() {
+	        writeDataTOFile(listener);
 	    }
-	    while (isRecording) {
-	        readsize = audioRecord.read(audiodata, 0, bufferSizeInBytes);
-	        if (AudioRecord.ERROR_INVALID_OPERATION != readsize && fos != null) {
-	            try {
-	                fos.write(audiodata);
-	            } catch (IOException e) {
-	                Log.e("AudioRecorder", e.getMessage());
-	            }
+    	}).start();
+
+    	// 如何将音频写入文件是重点，我写个伪代码，说明这个代码运行顺序
+    	// 首先创建 pcm 文件，得到他的 FileOutputStream，然后不断循环 AudioRecord 通过 read 将录音的数据放入字节数组里，
+    	// 当录音结束的时候要记得停止这个循环
+    	FileOutputStream fos = null;
+    	int readsize = 0;
+    	try {
+	    File file = new File(currentFileName);
+	    if (file.exists()) {
+	        file.delete();
+	    }
+	    // 建立一个可存取字节的文件
+	    fos = new FileOutputStream(file);
+    	} catch (IllegalStateException e) {
+	    Log.e("AudioRecorder", e.getMessage());
+	    throw new IllegalStateException(e.getMessage());
+    	} catch (FileNotFoundException e) {
+	    Log.e("AudioRecorder", e.getMessage());
+    	}
+    	while (isRecording) {
+	    readsize = audioRecord.read(audiodata, 0, bufferSizeInBytes);
+	    if (AudioRecord.ERROR_INVALID_OPERATION != readsize && fos != null) {
+	        try {
+		    fos.write(audiodata);
+	        } catch (IOException e) {
+		    Log.e("AudioRecorder", e.getMessage());
 	        }
 	    }
+    	}
 	```
 - **关闭数据流**
 
@@ -157,17 +156,17 @@ Android SDK 提供了两套音频采集的API，分别是：MediaRecorder 和 Au
 	```
 #### 流程走向
 - buffer 从 AudioRecord 中拉取声音数据
-```mermaid
-graph LR
-A[音频硬件] -- 可分多次读取声音数据 --> B[AudioRecord]
-B[AudioRecord] -- 通过 read 方法拉取声音数据 --> C(buffer)
-```
+	```mermaid
+	graph LR
+	A[音频硬件] -- 可分多次读取声音数据 --> B[AudioRecord]
+	B[AudioRecord] -- 通过 read 方法拉取声音数据 --> C(buffer)
+	```
 - 创建一个数据流，开启一个线程，一边从 AudioRecord 中读取数据，一边将数据导入到数据流中
-```mermaid
-graph LR
-A[AudioRecord] -- 读取大小等于 buffer 容量的声音数据 --> B[buffer]
-B[buffer] -- 导入 --> C[数据流]
-```
+	```mermaid
+	graph LR
+	A[AudioRecord] -- 读取大小等于 buffer 容量的声音数据 --> B[buffer]
+	B[buffer] -- 导入 --> C[数据流]
+	```
 #### 参考文献
 - [Android音频开发（2）：如何采集一帧音频](https://blog.51cto.com/ticktick/1749719)
 - [Android 音视频开发(二)：使用 AudioRecord 采集音频PCM并保存到文件](https://www.cnblogs.com/renhui/p/7457321.html)
